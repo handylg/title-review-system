@@ -22,9 +22,11 @@ def _database_url() -> str:
     url = os.getenv("DATABASE_URL")
     if not url:
         return f"sqlite:///{DB_PATH.as_posix()}"
-    # 兼容 Heroku/Render 早期的 postgres:// 前缀
+    # 兼容裸 postgres:// 前缀，并统一使用 psycopg (v3) 驱动
     if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
+        url = url.replace("postgres://", "postgresql+psycopg://", 1)
+    elif url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+psycopg://", 1)
     return url
 
 
