@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>职称评审科研成果认定与积分计算系统</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo">职</span>
+      <div>
+        <h1>职称评审科研成果认定与积分计算系统</h1>
+        <p class="subtitle">成果录入 · 认定审核 · 积分规则 · 自动计分 · 报表导出</p>
+      </div>
+    </div>
+    <a class="doc-link" href="/docs" target="_blank" rel="noreferrer">接口文档</a>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="dashboard">概览</button>
+    <button class="tab" data-tab="achievements">成果录入与认定</button>
+    <button class="tab" data-tab="rules">积分规则</button>
+    <button class="tab" data-tab="persons">人员管理</button>
+    <button class="tab" data-tab="departments">部门管理</button>
+    <button class="tab" data-tab="reports">积分报表</button>
+  </nav>
+
+  <main>
+    <!-- 概览 -->
+    <section class="panel active" id="panel-dashboard">
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="grid-2">
+        <div class="card">
+          <h2>各类别已认定积分分布</h2>
+          <div id="categoryChart" class="chart"></div>
+        </div>
+        <div class="card">
+          <h2>部门积分排行</h2>
+          <div id="deptRanking" class="ranking"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>认定状态统计</h2>
+        <div id="statusStats" class="status-stats"></div>
+      </div>
+    </section>
+
+    <!-- 成果录入与认定 -->
+    <section class="panel" id="panel-achievements">
+      <div class="toolbar">
+        <select id="achStatus">
+          <option value="">全部状态</option>
+          <option value="pending">待认定</option>
+          <option value="approved">已认定</option>
+          <option value="rejected">不予认定</option>
+        </select>
+        <select id="achCategory"><option value="">全部类别</option></select>
+        <input id="achYear" type="number" placeholder="年份" />
+        <input id="achKeyword" type="text" placeholder="按成果名称/编号搜索" />
+        <button class="btn" id="achSearch">查询</button>
+        <button class="btn ghost" id="achReset">重置</button>
+        <span class="spacer"></span>
+        <button class="btn primary" id="achNew">+ 新增成果</button>
+      </div>
+      <div class="table-wrap">
+        <table id="achTable">
+          <thead>
+            <tr>
+              <th>成果名称</th>
+              <th>类别 / 级别</th>
+              <th class="num">基础分</th>
+              <th class="num">年份</th>
+              <th>申报人</th>
+              <th>完成人及得分</th>
+              <th class="num">总分</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 积分规则 -->
+    <section class="panel" id="panel-rules">
+      <div class="card">
+        <div class="card-head">
+          <h2>成果类别与级别基础分</h2>
+          <button class="btn primary" id="newCategory">+ 新增类别</button>
+        </div>
+        <p class="hint">基础分为该级别成果的总分值，个人得分 = 基础分 × 作者分成系数。</p>
+        <div id="categoryList"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h2>作者贡献系数规则</h2>
+          <button class="btn primary" id="newRule">+ 新增规则</button>
+        </div>
+        <p class="hint">
+          按「类别 + 作者人数」配置各排名的分成系数，系数之和应为 1.0；类别留空表示通用默认规则。
+          通讯作者系数可选，填写后通讯作者按该系数计分，其余作者按原比例等比例缩放。
+        </p>
+        <div class="table-wrap">
+          <table id="ruleTable">
+            <thead>
+              <tr>
+                <th>适用类别</th>
+                <th class="num">作者人数</th>
+                <th>各排名分成系数</th>
+                <th class="num">通讯作者系数</th>
+                <th>备注</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 人员管理 -->
+    <section class="panel" id="panel-persons">
+      <div class="toolbar">
+        <select id="personDept"><option value="">全部部门</option></select>
+        <input id="personKeyword" type="text" placeholder="按姓名/工号搜索" />
+        <button class="btn" id="personSearch">查询</button>
+        <span class="spacer"></span>
+        <button class="btn primary" id="newPerson">+ 新增人员</button>
+      </div>
+      <div class="table-wrap">
+        <table id="personTable">
+          <thead>
+            <tr>
+              <th>姓名</th>
+              <th>工号</th>
+              <th>所属部门</th>
+              <th>现有职称</th>
+              <th>申报职称</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 部门管理 -->
+    <section class="panel" id="panel-departments">
+      <div class="toolbar">
+        <span class="spacer"></span>
+        <button class="btn primary" id="newDept">+ 新增部门</button>
+      </div>
+      <div class="table-wrap">
+        <table id="deptTable">
+          <thead>
+            <tr>
+              <th>部门名称</th>
+              <th>编码</th>
+              <th>备注</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 积分报表 -->
+    <section class="panel" id="panel-reports">
+      <div class="toolbar">
+        <input id="reportYear" type="number" placeholder="年份（留空为全部）" />
+        <select id="reportDept"><option value="">全部部门</option></select>
+        <select id="reportStatus">
+          <option value="approved">仅已认定</option>
+          <option value="pending">仅待认定</option>
+          <option value="">全部状态</option>
+        </select>
+        <button class="btn" id="reportSearch">生成报表</button>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="exportPerson">导出个人积分 CSV</button>
+        <button class="btn ghost" id="exportAchievement">导出成果明细 CSV</button>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h2>个人积分排行</h2>
+          <span class="hint" id="reportSummary"></span>
+        </div>
+        <div class="table-wrap">
+          <table id="reportPersonTable">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h2>部门积分汇总</h2>
+        <div class="table-wrap">
+          <table id="reportDeptTable">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" id="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">标题</h3>
+        <button class="icon-btn" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot" id="modalFoot"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
